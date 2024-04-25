@@ -22,7 +22,13 @@ fn main() {
     let mut graph: HashMap<usize, Vec<usize>> = HashMap::new(); 
 
     for (s_node, r_node) in edges {
-        graph.entry(s_node).or_insert_with(Vec::new).push(r_node);
-        graph.entry(s_node).or_insert_with(Vec::new).push(r_node);
+        graph.entry(*s_node).or_insert_with(Vec::new).push(*r_node);
+        graph.entry(*s_node).or_insert_with(Vec::new).push(*r_node);
+    }
+    //Degree Centrality
+    let mut degree_centrality: HashMap<usize, f64> = HashMap::new();
+    for(node, neighbors) in &graph {
+        let degree_cent = neighbors.len() as f64 / (graph.len() - 1) as f64;
+        degree_centrality.insert(*node, degree_cent);
     }
 }
