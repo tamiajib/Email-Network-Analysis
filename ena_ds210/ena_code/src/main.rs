@@ -3,6 +3,7 @@ use std::fs:File;
 use std::io::BufReader;
 
 fn main() {
+    //Read File + Extract Sender/Recipient IDs
     let file = File::open("email-Enron.txt").expect("Failed to open file");
     let reader = BufReader::new(file);
     let mut edges: Vec<(usize, usize)> = vec![];
@@ -16,5 +17,12 @@ fn main() {
             edges.push((s_node, r_node));
 
         }
+    }
+    //Build Undirected Graph Representation
+    let mut graph: HashMap<usize, Vec<usize>> = HashMap::new(); 
+
+    for (s_node, r_node) in edges {
+        graph.entry(s_node).or_insert_with(Vec::new).push(r_node);
+        graph.entry(s_node).or_insert_with(Vec::new).push(r_node);
     }
 }
