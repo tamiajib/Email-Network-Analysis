@@ -1,5 +1,5 @@
-use std::collections::HashMap;
-use std::fs:File;
+use std::collections::{HashMap, HashSet};
+use std::fs::File;
 use std::io::BufReader;
 
 fn main() {
@@ -22,8 +22,8 @@ fn main() {
     let mut graph: HashMap<usize, Vec<usize>> = HashMap::new(); 
 
     for (s_node, r_node) in edges {
-        graph.entry(*s_node).or_insert_with(Vec::new).push(*r_node);
-        graph.entry(*s_node).or_insert_with(Vec::new).push(*r_node);
+        graph.entry(s_node).or_insert_with(Vec::new).push(r_node);
+        graph.entry(s_node).or_insert_with(Vec::new).push(r_node);
     }
     //Degree Centrality {Number of Neighbours/Total Number of Nodes - 1}
     //(Subtracing 1 from the total number of nodes is to normalize the dgree centrality measure)
@@ -63,10 +63,33 @@ fn main() {
                     num_paths.insert(*neighbor, num_paths.get(neighbor).unwrap() + num_paths.get(&current_node).unwrap());
                 }
             }
-            //Depenency Calculation 
-        }
+            //Depenency Calculation
+            if queue.is_empty() && !stack.is_empty(){
+                let node = stack.pop().unwrap(); 
+                if node == stack.pop().unwrap();
+                if !paths.contains_key(&node){
+                    paths.insert(node, 0.0);
+                }
+                paths.insert(node, paths.get(&node).unwrap() + 1.0); 
 
-
+                for neighbor in graph.get(&node).unwrap(){
+                    let np = *num_paths.get(&node).unwrap() as f64; 
+                    let path = *paths.get(&node).unwrap() as f64; 
+                    let path_share = path/np; 
+                    if !betweenness_centrality.contains_key(neighbor){
+                        betweenness_centrality.insert(*neighbor, 0.0);
+                    }
+                    betweenness_centrality.insert(*neighbor, betweenness_centrality.get(neighbor).unwrap() + path_share);
+                    if neighbor != node {
+                        let npp = *num_paths.get(neighbor). unwrap() as f64;
+                        if !betweenness_centrality.contains_key(&node) {
+                            betweenness_centrality.insert(node, 0.0);
+                        }
+                        betweenness_centrality.insert(node, betweenness_centrality.get(&node).unwrap() + npp * path_share);
+                    }
+    //Normalize the betweenness centrality 
+    //Need to figure out how to ensure nodes are not added as their own neightbours in the caase that aan email is sent to oneself??
+            }   }   
+        }    
     }
-
 }
