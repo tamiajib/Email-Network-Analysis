@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
-use std::io::BufReader;
+use std::io::{BufReader, BufRead};
 
 fn main() {
     //Read File + Extract Sender/Recipient IDs
@@ -49,7 +49,7 @@ fn main() {
             let current_node = queue.remove(0); 
             visited.insert(current_node); 
 
-            for neighbor in graph.get(current_node).unwrap() {
+            for neighbor in graph.get(&current_node).unwrap() {
                 if !visited.contains(neighbor) {
                     if !queue.contains(neighbor) {
                         queue.push(*neighbor);
