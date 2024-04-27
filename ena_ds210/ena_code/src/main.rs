@@ -26,6 +26,9 @@ fn main() {
         graph.entry(r_node).or_insert_with(Vec::new).push(s_node); // Include both directions
     }
 
+    //print graph for funtionality testing 
+    println!("Graph: {:?}", graph);
+
     // Degree Centrality {Number of Neighbours/Total Number of Nodes - 1}
     //(Subtracting 1 from the total number of nodes is to normalize the degree centrality measure)
     let mut degree_centrality: HashMap<usize, f64> = HashMap::new();
@@ -33,6 +36,9 @@ fn main() {
         let degree_cent = neighbors.len() as f64 / (graph.len() - 1) as f64;
         degree_centrality.insert(*node, degree_cent);
     }
+
+    //Print dc for functionality testing REMOVE AFTER
+    println! ("Degree Centrality {:?}", degree_centrality);
 
     // Betweenness Centrality {Brandes' Algorithm}
     let mut betweenness_centrality: HashMap<usize, f64> = HashMap::new();
@@ -93,4 +99,11 @@ fn main() {
             }
         }
     }
+    //Normalize the Betweeness Centrality Values 
+    for (_,bc) in betweenness_centrality.iter_mut() {
+        *bc /= 2.0;
+    }
+
+    //Print bc for functionality testing REMOVE AFTER 
+    println!("Betweenness Centrality: {:?}", betweenness_centrality);
 }
