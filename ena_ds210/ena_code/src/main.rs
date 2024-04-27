@@ -64,12 +64,12 @@ fn main() {
                 }
             }
             //Depenency Calculation
-            if queue.is_empty() && !stack.is_empty(){
+            if queue.is_empty() && !stack.is_empty() {
                 let node = stack.pop().unwrap(); 
-                if node == stack.pop().unwrap();
-                if !paths.contains_key(&node){
-                    paths.insert(node, 0.0);
-                }
+                if node == stack.pop().unwrap(){
+                    if !paths.contains_key(&node){
+                        paths.insert(node, 0.0);
+                    }
                 paths.insert(node, paths.get(&node).unwrap() + 1.0); 
 
                 for neighbor in graph.get(&node).unwrap(){
@@ -80,16 +80,17 @@ fn main() {
                         betweenness_centrality.insert(*neighbor, 0.0);
                     }
                     betweenness_centrality.insert(*neighbor, betweenness_centrality.get(neighbor).unwrap() + path_share);
-                    if neighbor != node {
+                    if *neighbor != node {
                         let npp = *num_paths.get(neighbor). unwrap() as f64;
                         if !betweenness_centrality.contains_key(&node) {
                             betweenness_centrality.insert(node, 0.0);
                         }
                         betweenness_centrality.insert(node, betweenness_centrality.get(&node).unwrap() + npp * path_share);
                     }
-    //Normalize the betweenness centrality 
-    //Need to figure out how to ensure nodes are not added as their own neightbours in the caase that aan email is sent to oneself??
-            }   }   
-        }    
+                }    
+                }      
+            } 
+        }
+           
     }
 }
