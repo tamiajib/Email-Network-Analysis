@@ -1,139 +1,21 @@
-use std::collections::{HashMap, HashSet};
-use std::fs::File;
-use std::io::{BufReader, BufRead};
+mod graph;
+mod analysis;
+
+use crate::graph::build_graph;
+use crate::analysis::{
+    calculate_degree_centrality, calculate_betweenness_centrality, calculate_average_path_length,
+    validate_six_degrees,
+};
 
 fn main() {
-    // Read File + Extract Sender/Recipient IDs
-    let file = File::open("email-Enron.txt").expect("Failed to open file");
-    let reader = BufReader::new(file);
-    let mut edges: Vec<(usize, usize)> = vec![];
+    let graph = build_graph("email-Enron.txt");
+    let degree_centrality = calculate_degree_centrality(&graph);
+    let betweenness_centrality = calculate_betweenness_centrality(&graph);
+    let average_path_length = calculate_average_path_length(&graph);
+    let is_six_degrees = validate_six_degrees(average_path_length);
 
-    for line in reader.lines().skip(5) {
-        let line = line.expect("Failed to read line");
-        let parts: Vec<&str> = line.split('\t').collect();
-        if parts.len() == 2 {
-            let s_node: usize = parts[0].parse().unwrap();
-            let r_node: usize = parts[1].parse().unwrap();
-            edges.push((s_node, r_node));
-        }
-    }
-
-    // Build Undirected Graph Representation
-    let mut graph: HashMap<usize, Vec<usize>> = HashMap::new();
-
-    for (s_node, r_node) in edges {
-        graph.entry(s_node).or_insert_with(Vec::new).push(r_node);
-        graph.entry(r_node).or_insert_with(Vec::new).push(s_node); // Include both directions
-    }
-
-    // Degree Centrality {Number of Neighbours/Total Number of Nodes - 1}
-    //(Subtracting 1 from the total number of nodes is to normalize the degree centrality measure)
-    let mut degree_centrality: HashMap<usize, f64> = HashMap::new();
-    for (node, neighbors) in &graph {
-        let degree_cent = neighbors.len() as f64 / (graph.len() - 1) as f64;
-        degree_centrality.insert(*node, degree_cent);
-    }
-
-    // Betweenness Centrality {Brandes' Algorithm}
-    let mut betweenness_centrality: HashMap<usize, f64> = HashMap::new();
-    for node in graph.keys() {
-        let mut num_paths = HashMap::new();
-        let mut stack = Vec::new();
-        let mut paths = HashMap::new();
-        let mut queue = Vec::new();
-        let mut visited = HashSet::new();
-
-        num_paths.insert(*node, 1);
-        queue.push(*node);
-
-        // Breadth-First Search (BFS)
-        while !queue.is_empty() {
-            let current_node = queue.remove(0);
-            visited.insert(current_node);
-
-            for neighbor in graph.get(&current_node).unwrap() {
-                if !visited.contains(neighbor) {
-                    if !queue.contains(neighbor) {
-                        queue.push(*neighbor);
-                    }
-                    if !stack.contains(&current_node) {
-                        stack.push(current_node);
-                    }
-                    if !num_paths.contains_key(neighbor) {
-                        num_paths.insert(*neighbor, 0);
-                    }
-                    num_paths.insert(*neighbor, num_paths.get(neighbor).unwrap() + num_paths.get(&current_node).unwrap());
-                }
-            }
-
-            // Dependency Calculation
-            if queue.is_empty() && !stack.is_empty() {
-                let node = stack.pop().unwrap();
-                if !paths.contains_key(&node) {
-                    paths.insert(node, 0.0);
-                }
-                paths.insert(node, paths.get(&node).unwrap() + 1.0);
-
-                for neighbor in graph.get(&node).unwrap() {
-                    let np = *num_paths.get(&node).unwrap() as f64;
-                    let path = *paths.get(&node).unwrap() as f64;
-                    let path_share = path / np;
-                    if !betweenness_centrality.contains_key(neighbor) {
-                        betweenness_centrality.insert(*neighbor, 0.0);
-                    }
-                    betweenness_centrality.insert(*neighbor, betweenness_centrality.get(neighbor).unwrap() + path_share);
-                    if *neighbor != node {
-                        let npp = *num_paths.get(neighbor).unwrap_or(&0) as f64;
-                        if !betweenness_centrality.contains_key(&node) {
-                            betweenness_centrality.insert(node, 0.0);
-                        }
-                        betweenness_centrality.insert(node, betweenness_centrality.get(&node).unwrap() + npp * path_share);
-                    }
-                }
-            }
-        }
-    }
-
-    //Normalize the Betweeness Centrality Values 
-    for (_,bc) in betweenness_centrality.iter_mut() {
-        *bc /= 2.0;
-    }
-
-    //Calculate Average Path Length 
-    let mut total_path_length = 0; 
-    let mut total_paths = 0; 
-
-    for start_node in graph.keys() {
-        let mut distances = HashMap::new();
-        let mut visited = HashSet::new();
-        let mut queue = Vec::new();
-
-        distances.insert(*start_node, 0);
-        queue.push(*start_node);
-
-        while let Some(current_node) = queue.pop() {
-            if !visited.contains(&current_node) {
-                visited.insert(current_node); 
-                for neighbor in graph.get(&current_node).unwrap() {
-                    let distance = *distances.get(&current_node).unwrap() +1;
-                    if !distances.contains_key(neighbor) {
-                        distances.insert(*neighbor, distance);
-                        queue.push(*neighbor);
-                    }
-                }
-            }
-        }
-        
-        for (_, distance)in distances.iter() {
-            total_path_length += distance; 
-            total_paths += 1;
-        }
-    }
-
-    let average_path_length = total_path_length as f64 / total_paths as f64; 
-
-    //Validate Theory 
-    let six_degrees = 6.0;
-    let is_six_degrees = average_path_length <= six_degrees;
-
+    println!("Degree Centrality: {:?}", degree_centrality);
+    println!("Betweenness Centrality: {:?}", betweenness_centrality);
+    println!("Average Path Length: {}", average_path_length);
+    println!("Validation of Theory: {}", is_six_degrees);
 }
