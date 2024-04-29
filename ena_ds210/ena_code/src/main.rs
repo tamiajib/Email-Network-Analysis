@@ -1,11 +1,11 @@
 mod graph;
-mod analysis;
-
 use crate::graph::build_graph;
-use crate::analysis::{
-    calculate_degree_centrality, calculate_betweenness_centrality, calculate_average_path_length,
-    validate_six_degrees,
-};
+
+mod analysis;
+use crate::analysis::calculate_degree_centrality;
+use crate::analysis::calculate_betweenness_centrality;
+use crate::analysis::calculate_average_path_length;
+use crate::analysis::validate_six_degrees;
 
 fn main() {
     let graph = build_graph("email-Enron.txt");
