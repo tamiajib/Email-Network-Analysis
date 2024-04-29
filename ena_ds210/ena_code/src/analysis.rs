@@ -40,7 +40,7 @@ pub fn calculate_betweenness_centrality(graph: &HashMap<usize, Vec<usize>>) -> H
                     if !num_paths.contains_key(neighbor) {
                         num_paths.insert(*neighbor, 0);
                     }
-                    num_paths.insert(*neighbor, num_paths.get(neighbor).unwrap() + num_paths.get(&current_node).unwrap());
+                    num_paths.insert(*neighbor, *num_paths.get(neighbor).unwrap_or(&0) + *num_paths.get(&current_node).unwrap());
                 }
             }
 
